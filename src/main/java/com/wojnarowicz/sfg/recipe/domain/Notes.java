@@ -11,7 +11,5 @@ import lombok.Setter;
 @Setter
 public class Notes extends BaseEntity {
 
-    private Recipe recipe;
     private String recipeNotes;
-
 }

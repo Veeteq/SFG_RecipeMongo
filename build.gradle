@@ -18,6 +18,11 @@ plugins {
 	id 'java'
 }
 
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
 group = 'com.wojnarowicz.sfg'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
@@ -41,6 +46,7 @@ dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile 'org.springframework.boot:spring-boot-starter-web'
 	runtime 'org.springframework.boot:spring-boot-devtools'
+	compile 'org.webjars:bootstrap:4.4.1'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testCompile('org.springframework.boot:spring-boot-starter-test') 

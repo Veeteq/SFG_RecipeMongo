@@ -111,6 +111,9 @@ public class IngredientServiceImpl implements IngredientService {
             }
 
             //to do check for fail
+            IngredientCommand savedIngredientCommand = ingredientToIngredientCommand.convert(savedIngredientOptional.get());
+            savedIngredientCommand.setRecipeId(recipe.getId());
+            
             return ingredientToIngredientCommand.convert(savedIngredientOptional.get());
         }
 
