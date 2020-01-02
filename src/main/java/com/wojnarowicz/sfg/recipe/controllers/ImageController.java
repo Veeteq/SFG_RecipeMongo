@@ -19,9 +19,6 @@ import com.wojnarowicz.sfg.recipe.commands.RecipeCommand;
 import com.wojnarowicz.sfg.recipe.services.ImageService;
 import com.wojnarowicz.sfg.recipe.services.RecipeService;
 
-/**
- * Created by jt on 7/3/17.
- */
 @Controller
 public class ImageController {
 
@@ -35,7 +32,7 @@ public class ImageController {
 
     @GetMapping("recipe/{id}/image")
     public String showUploadForm(@PathVariable String id, Model model){
-        model.addAttribute("recipe", recipeService.findCommandById(id));
+        model.addAttribute("recipe", recipeService.findCommandById(id).block());
 
         return "recipe/imageuploadform";
     }
