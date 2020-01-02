@@ -1,17 +1,13 @@
 package com.wojnarowicz.sfg.recipe.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-/**
- * Created by jt on 6/13/17.
- */
+import lombok.Getter;
+import lombok.Setter;
+
 @Getter
 @Setter
 @Document
@@ -28,8 +24,6 @@ public class Recipe extends NamedEntity {
     private Byte[] image;
     private Difficulty difficulty;
     private Notes notes;
-
-    @DBRef
     private Set<Category> categories = new HashSet<>();
 
     public void setNotes(Notes notes) {

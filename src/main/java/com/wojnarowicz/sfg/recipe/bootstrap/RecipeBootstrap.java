@@ -22,9 +22,6 @@ import com.wojnarowicz.sfg.recipe.repositories.UnitOfMeasureRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Created by jt on 6/13/17.
- */
 @Slf4j
 @Component
 public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEvent> {
@@ -42,16 +39,21 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     @Override
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
-    	if(categoryRepository.count() == 0) {
+        log.debug("Loading Bootstrap Data");
+    	long categoriesCount = categoryRepository.count();
+        if(categoriesCount == 0) {
     		loadCategories();
     	}
     	
-    	if(unitOfMeasureRepository.count() == 0) {
-    		loadUom();
+    	long uomCount = unitOfMeasureRepository.count();
+    	if(uomCount == 0) {
+    	    loadUom();
     	}
-        
-        recipeRepository.saveAll(getRecipes());
-        log.debug("Loading Bootstrap Data");
+
+    	Long recipesCount = recipeRepository.count();
+    	if(recipesCount == 0) {
+    	    recipeRepository.saveAll(getRecipes());
+    	}
     }
 
     private void loadCategories(){
@@ -173,7 +175,8 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
 
         //Yummy Guac
         Recipe guacRecipe = new Recipe();
-        guacRecipe.setDescription("Perfect Guacamole");
+        guacRecipe.setName("Perfect Guacamole");
+        guacRecipe.setDescription("Perfect Guacamole");        
         guacRecipe.setPrepTime(10);
         guacRecipe.setCookTime(0);
         guacRecipe.setDifficulty(Difficulty.EASY);
@@ -281,6 +284,7 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
         tacosRecipe.setSource("Simply Recipes");
 
         recipes.add(tacosRecipe);
+                
         return recipes;
     }
 }

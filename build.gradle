@@ -43,17 +43,21 @@ repositories {
 
 dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	compile 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile 'org.springframework.boot:spring-boot-starter-web'
 	runtime 'org.springframework.boot:spring-boot-devtools'
 	compile 'org.webjars:bootstrap:4.4.1'
+	compile 'org.webjars:jquery:3.4.1'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testCompile('org.springframework.boot:spring-boot-starter-test') 
-    testCompile(group: 'io.projectreactor', name: 'reactor-test', version: '3.1.0.RELEASE')
+    testCompile(group: 'io.projectreactor', name: 'reactor-test')
 	
 }
 
 test {
 	useJUnitPlatform()
+	exclude 'com/wojnarowicz/sfg/recipe/reactive/**'
+	
 }

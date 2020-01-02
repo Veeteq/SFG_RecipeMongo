@@ -1,36 +1,30 @@
 package com.wojnarowicz.sfg.recipe.services.impl;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.springframework.stereotype.Service;
 
 import com.wojnarowicz.sfg.recipe.commands.UnitOfMeasureCommand;
 import com.wojnarowicz.sfg.recipe.converters.UnitOfMeasureToUnitOfMeasureCommand;
-import com.wojnarowicz.sfg.recipe.repositories.UnitOfMeasureRepository;
+import com.wojnarowicz.sfg.recipe.repositories.UnitOfMeasureReactiveRepository;
 import com.wojnarowicz.sfg.recipe.services.UnitOfMeasureService;
 
-/**
- * Created by jt on 6/28/17.
- */
+import reactor.core.publisher.Flux;
+
 @Service
 public class UnitOfMeasureServiceImpl implements UnitOfMeasureService {
 
-    private final UnitOfMeasureRepository unitOfMeasureRepository;
+    private final UnitOfMeasureReactiveRepository unitOfMeasureRepository;
     private final UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand;
 
-    public UnitOfMeasureServiceImpl(UnitOfMeasureRepository unitOfMeasureRepository, UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand) {
+    public UnitOfMeasureServiceImpl(UnitOfMeasureReactiveRepository unitOfMeasureRepository, UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand) {
         this.unitOfMeasureRepository = unitOfMeasureRepository;
         this.unitOfMeasureToUnitOfMeasureCommand = unitOfMeasureToUnitOfMeasureCommand;
     }
 
     @Override
-    public Set<UnitOfMeasureCommand> listAllUoms() {
+    public Flux<UnitOfMeasureCommand> listAllUoms() {
 
-        return StreamSupport.stream(unitOfMeasureRepository.findAll()
-                .spliterator(), false)
-                .map(unitOfMeasureToUnitOfMeasureCommand::convert)
-                .collect(Collectors.toSet());
+        return unitOfMeasureRepository
+                .findAll()
+                .map(unitOfMeasureToUnitOfMeasureCommand::convert);
     }
 }

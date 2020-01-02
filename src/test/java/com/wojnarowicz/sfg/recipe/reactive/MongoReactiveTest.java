@@ -83,7 +83,7 @@ class MongoReactiveTest {
         
         Flux<Person> persons = Flux.just(michael, fiona, sam, jesse);
         
-        persons.delayElements(Duration.ofSeconds(2))
+        persons.delayElements(Duration.ofSeconds(1))
         .doOnComplete(() -> countDownLatch.countDown())
         .subscribe(person -> log.info(person.sayMyName()));
         

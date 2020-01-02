@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -24,9 +25,8 @@ import org.springframework.ui.Model;
 import com.wojnarowicz.sfg.recipe.domain.Recipe;
 import com.wojnarowicz.sfg.recipe.services.RecipeService;
 
-/**
- * Created by jt on 6/17/17.
- */
+import reactor.core.publisher.Flux;
+
 public class IndexControllerTest {
 
     @Mock
@@ -48,6 +48,8 @@ public class IndexControllerTest {
     public void testMockMVC() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
+        when(recipeService.getRecipes()).thenReturn(Flux.empty());
+
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"));
@@ -58,28 +60,29 @@ public class IndexControllerTest {
 
         //given
         Set<Recipe> recipes = new HashSet<>();
-        recipes.add(new Recipe());
+        
+        Recipe recipe1 = new Recipe();
+        recipe1.setId("1");
+        recipes.add(recipe1);
 
-        Recipe recipe = new Recipe();
-        recipe.setId("1");
+        Recipe recipe2 = new Recipe();
+        recipe2.setId("2");
+        recipes.add(recipe2);
 
-        recipes.add(recipe);
-
-        when(recipeService.getRecipes()).thenReturn(recipes);
+        when(recipeService.getRecipes()).thenReturn(Flux.fromIterable(recipes));
 
         @SuppressWarnings("unchecked")
-		ArgumentCaptor<Set<Recipe>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Flux<Recipe>> argumentCaptor = ArgumentCaptor.forClass(Flux.class);
 
         //when
         String viewName = controller.getIndexPage(model);
-
 
         //then
         assertEquals("index", viewName);
         verify(recipeService, times(1)).getRecipes();
         verify(model, times(1)).addAttribute(eq("recipes"), argumentCaptor.capture());
-        Set<Recipe> setInController = argumentCaptor.getValue();
-        assertEquals(2, setInController.size());
+        Flux<Recipe> fluxValues = argumentCaptor.getValue();
+        List<Recipe> recipeList = fluxValues.collectList().block(); 
+        assertEquals(2, recipeList.size());
     }
-
 }

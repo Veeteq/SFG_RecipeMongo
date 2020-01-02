@@ -8,9 +8,6 @@ import com.wojnarowicz.sfg.recipe.services.RecipeService;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Created by jt on 6/1/17.
- */
 @Slf4j
 @Controller
 public class IndexController {
