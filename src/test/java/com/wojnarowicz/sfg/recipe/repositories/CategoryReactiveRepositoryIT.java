@@ -13,8 +13,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.wojnarowicz.sfg.recipe.domain.Category;
 
-import reactor.core.publisher.Mono;
-
 @ExtendWith(SpringExtension.class)
 @DataMongoTest
 class CategoryReactiveRepositoryIT {
@@ -41,7 +39,7 @@ class CategoryReactiveRepositoryIT {
     
     @Test
     void testSave() {
-        categoryReactiveRepository.save(testCategory).block();
+        categoryReactiveRepository.save(testCategory).then().block();
         
         Long categoriesCount = categoryReactiveRepository.count().block();
         assertEquals(1, categoriesCount);
@@ -53,7 +51,7 @@ class CategoryReactiveRepositoryIT {
         
         Long categoriesCount = categoryReactiveRepository.count().block();
         
-        Mono<Category> savedCategory = categoryReactiveRepository.findByName(TEST_CATEGORY);
+        Category savedCategory = categoryReactiveRepository.findByName(TEST_CATEGORY).block();
         assertEquals(1, categoriesCount);
         assertNotNull(savedCategory);
     }

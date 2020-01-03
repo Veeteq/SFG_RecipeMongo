@@ -5,9 +5,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.HashSet;
 import java.util.List;
@@ -15,11 +12,16 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.ui.Model;
 
 import com.wojnarowicz.sfg.recipe.domain.Recipe;
@@ -27,8 +29,15 @@ import com.wojnarowicz.sfg.recipe.services.RecipeService;
 
 import reactor.core.publisher.Flux;
 
+@ExtendWith(SpringExtension.class)
+//@WebFluxTest
+@SpringBootTest
+@AutoConfigureWebTestClient
 public class IndexControllerTest {
 
+    @Autowired
+    WebTestClient webTestClient;
+    
     @Mock
     RecipeService recipeService;
 
@@ -40,19 +49,21 @@ public class IndexControllerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
+        
         controller = new IndexController(recipeService);
+        
+        webTestClient = WebTestClient.bindToController(controller).build();
     }
 
     @Test
     public void testMockMVC() throws Exception {
-        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
-        when(recipeService.getRecipes()).thenReturn(Flux.empty());
-
-        mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"));
+        BDDMockito.given(recipeService.getRecipes()).willReturn(Flux.just());
+        
+        webTestClient.get()
+        .uri("/")
+        .exchange()
+        .expectStatus().isOk();
     }
 
     @Test

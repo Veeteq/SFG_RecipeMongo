@@ -3,7 +3,6 @@ package com.wojnarowicz.sfg.recipe.services.impl;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.wojnarowicz.sfg.recipe.commands.IngredientCommand;
 import com.wojnarowicz.sfg.recipe.converters.IngredientCommandToIngredient;
@@ -41,7 +40,7 @@ public class IngredientServiceImpl implements IngredientService {
         return recipeRepository
                 .findById(recipeId)
                 .flatMapIterable(Recipe::getIngredients)
-                .filter(ingredient -> ingredient.getId().equalsIgnoreCase(ingredientId))
+                .filter(ingredient -> ingredient.getId().equals(ingredientId))
                 .single()
                 .map(ingredient -> {
                     IngredientCommand ingredientCommand = ingredientToIngredientCommand.convert(ingredient);
@@ -51,38 +50,51 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Override
-    @Transactional
     public Mono<IngredientCommand> saveIngredientCommand(IngredientCommand command) {
-        Recipe recipe = recipeRepository.findById(command.getRecipeId()).block();
-
-        if(recipe == null) {
-            //todo toss error if not found!
-            log.error("Recipe not found for id: " + command.getRecipeId());
-            return Mono.just(new IngredientCommand());
-        } else {
-            Optional<Ingredient> ingredientOptional = recipe
-                    .getIngredients()
-                    .stream()
-                    .filter(ingredient -> ingredient.getId().equals(command.getId()))
-                    .findFirst();
-
+        recipeRepository.findById(command.getRecipeId())
+        .subscribe(recipe -> {
+            Optional<Ingredient> ingredientOptional = recipe.getIngredients()
+            .stream()
+            .filter(ingredient -> ingredient.getId().equals(command.getId()))
+            .findFirst();
+            
             if(ingredientOptional.isPresent()){
                 Ingredient ingredientFound = ingredientOptional.get();
                 ingredientFound.setName(command.getName());
                 ingredientFound.setAmount(command.getAmount());
-                ingredientFound.setUom(unitOfMeasureRepository
-                        .findById(command.getUom().getId()).block());
+                ingredientFound.setUom(unitOfMeasureRepository.findById(command.getUom().getId()).block());
                 
                 if(ingredientFound.getUom() == null) {                        
                     new RuntimeException("UOM NOT FOUND"); //todo address this
                 }
             } else {
-                //add new Ingredient
                 Ingredient ingredient = ingredientCommandToIngredient.convert(command);
                 recipe.addIngredient(ingredient);
             }
+            
+            recipeRepository.save(recipe)
+            .subscribe(savedRecipe -> {
+                savedRecipe.getIngredients()
+                .stream()
+                .filter(ingredient -> ingredient.getId().equals(command.getId()))
+                .findFirst();
+            });
+        });
+        
+        return recipeRepository
+                .findById(command.getRecipeId())
+                .flatMapIterable(Recipe::getIngredients)
+                .filter(ingredient -> ingredient.getId().equals(command.getId()))
+                .single()
+                .map(ingredient -> {
+                    IngredientCommand ingredientCommand = ingredientToIngredientCommand.convert(ingredient);
+                    ingredientCommand.setRecipeId(command.getRecipeId());
+                    return ingredientCommand;
+                });
+/*        
 
-            Recipe savedRecipe = recipeRepository.save(recipe).block();
+
+            recipeRepository.save(recipe).subscribe(savedRecipe -> {
 
             Optional<Ingredient> savedIngredientOptional = savedRecipe
                     .getIngredients()
@@ -101,12 +113,13 @@ public class IngredientServiceImpl implements IngredientService {
             }
 
             //to do check for fail
-            IngredientCommand savedIngredientCommand = ingredientToIngredientCommand.convert(savedIngredientOptional.get());
-            savedIngredientCommand.setRecipeId(recipe.getId());
+            //savedIngredientCommand = ingredientToIngredientCommand.convert(savedIngredientOptional.get());
+            //savedIngredientCommand.setRecipeId(recipe.getId());
             
-            return Mono.just(savedIngredientCommand);
-        }
-
+            //return Mono.just(savedIngredientCommand);
+        });
+        });
+*/        
     }
 
     @Override
